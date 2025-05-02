@@ -1,5 +1,146 @@
+// lets solve this assignment : Introduction
+/* In this lab, you’ll construct a dynamic website for a fictional restaurant, 
+“The Green Byte Bistro.” This hands-on experience is designed to solidify your understanding of 
+using EJS templates with an Express.js application.
+
+A quick note before you dive in
+Don’t hesitate to collaborate with your classmates when working through labs.
+
+If you get stuck during the lab, we recommend revisiting the lesson materials first. They’re designed to provide you with the information and examples that will help you complete the exercises.
+
+What You’ll Build
+You’re going to create a vibrant, interactive website for The Green Byte Bistro. This website will feature:
+
+Homepage: Displays key details of the bistro - name, address, and contact info.
+Nav Bar: Includes links to various sections of the site.
+Menu Page: Showcases the menu, sorted into mains, desserts, and sides.
+Category Page: Generates pages for each menu type, using route parameters for content rendering.
+Lab exercises
+First, copy and paste the following data to be used in the lab above your / route in server.js:
+
+
+(done) Exercise 1: Create a homepage
+Create a view
+Create an home.ejs file inside of your views directory. Once created, add the following boilerplate:
+
+Copy
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+</head>
+<body>
+  <h1>Home Page</h1>
+</body>
+</html>
+Modify the route
+Now modify the existing route that handles the homepage / request. Update this route to render the home.ejs template in 
+response to a request.
+👀 When you refresh your browser, it should now be rendering the <h1> with the content Home Page.
+
+Send data to view
+Using the locals object, send the RESTAURANT data from server.js to the home.ejs view.
+
+Using EJS tags, update your HTML to display the restaurant details. Include name, address, and phone.
+
+Update the <title> of your home page to dynamically match the restaurant name.
+
+Level-Up: Include conditional rendering to add the line “Yes we are open!” to the page if the restaurant isOpen, and “Sorry, we are closed.” otherwise.
+
+
+
+Exercise 2: Create a nav bar
+Create a Nav partial
+Create a partials directory inside you views directory.
+Inside partials, create a nav.ejs file.
+Add the following code to nav.ejs:
+
+Copy
+<nav>
+  <a href="/">Home</a>
+  <a href="/menu">Full Menu</a>
+</nav>
+Add partial to home page
+Add your partial file to the top of the <body> in home.ejs
+
+Copy
+<%- include('./partials/nav') %>
+👀 Refresh to see a new nav bar appear.
+
+Create a new route
+Create a new menu route in server.js
+
+GET route to /menu
+res.render() a menu.ejs view (created next)
+Create a matching view
+Create a menu.ejs view for this new route in the views directory.
+
+Add boilerplate HTML to your new view:
+
+Copy
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu</title>
+</head>
+<body>
+  <h1>Full Menu</h1>
+</body>
+</html>
+👀 Test your new view in the browser. You should see “Full Menu” on the page.
+
+Add your nav.ejs partial to your menu page.
+Send data to view
+Using the locals object, pass the menu array data from server.js to the menu.ejs view.
+
+In menu.ejs, Use a forEach() loop, to render each of the menu items and their details to the page. Include name, price, rating and details for each item.
+
+Level Up: Using conditionals, refactor your code to render the items under three separate <h2> headers based on the category of the dish- "Mains" "Desserts" or "Sides".
+
+
+
+Exercise 3: Create a separate page for menu categories
+Create new links in the nav
+Add the following new links to nav.ejs
+Copy
+<nav>
+  <a href="/">Home</a>
+  <a href="/menu">Full Menu</a>
+  <!-- new links below-->
+  <a href="/menu/mains">Mains</a>
+  <a href="/menu/desserts">Desserts</a>
+  <a href="/menu/sides">Sides</a>
+</nav>
+Create a new route
+Create a new /menu/:category route in server.js
+
+GET route to /menu/:category that uses route parameters to determine the menu category being passed to that route
+res.render() a category.ejs view (created next)
+Create a matching view
+Create a category.ejs view for this new route in the views directory.
+
+Use menu.ejs as an example and add boilerplate HTML to your new view. Make sure to add the nav partial to the top of the page.
+
+Send data to view
+Using the locals object, pass an array of data called menuItems containing only items that match the req.params category to the category.ejs view. Best practice dictates that this data should be filtered before it is sent to the view. This can be done in the route handler with a for loop or the .filter() method.
+
+Send the category name in the locals object along with the filtered menu data. Level-Up: Capitalize the first letter for a better UI experience.
+
+Once in the view, use a forEach() loop, to render each of the menu items and their details to the page. Include name, price, rating and details for each item.
+
+Add the name of the category to the <title> of the page and to an <h1>.
+
+*/ 
+
 const express = require('express');
 const app = express();
+const PORT = 3000; 
+
+app.set('view engine', 'ejs');
 
 const RESTAURANT = {
     name: 'The Green Byte Bistro',
@@ -50,8 +191,28 @@ const RESTAURANT = {
     ]
   }
   
-app.get('/', (req, res) => {
-  res.send('Hello There!');
-});
+  app.get('/', (req, res) => {
+    res.render('home', { restaurant: RESTAURANT });
+  });
+  
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
 
-app.listen(3000);
+
+
+  app.get('/menu', (req, res) => {
+    res.render('menu', { menu: RESTAURANT.menu });
+  });
+  
+
+  app.get('/menu/:category', (req, res) => {
+    const category = req.params.category.toLowerCase();
+  
+    const menuItems = RESTAURANT.menu.filter(item => item.category === category);
+  
+    const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+  
+    res.render('category', { category: capitalizedCategory, menuItems
+    });
+  });
